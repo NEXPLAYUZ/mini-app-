@@ -28,7 +28,13 @@
     background: #1a1c22; border: none; color: #fff;
     border-radius: 18px; padding: 18px 10px; text-align: center;
   }
-  .service .icon { font-size: 36px; margin-bottom: 8px; }
+  .service .icon {
+    font-size: 36px; margin-bottom: 10px; height: 64px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .service .icon img {
+    width: 64px; height: 64px; object-fit: cover; border-radius: 16px;
+  }
   .service b { display: block; font-size: 16px; }
   .service span { color: #8b8f99; font-size: 13px; }
   .hidden { display: none; }
@@ -78,19 +84,19 @@
   <h2>Xizmatlar</h2>
   <div class="grid">
     <button class="service" onclick="openService('pubg')">
-      <div class="icon">🎯</div><b>PUBG UC</b><span>PUBG Mobile</span>
+      <div class="icon"><img src="pubg.png" data-e="🎯" onerror="this.replaceWith(document.createTextNode(this.dataset.e))"></div><b>PUBG UC</b><span>PUBG Mobile</span>
     </button>
     <button class="service" onclick="openService('ml')">
-      <div class="icon">💎</div><b>ML Diamonds</b><span>Mobile Legends</span>
+      <div class="icon"><img src="ml.png" data-e="💎" onerror="this.replaceWith(document.createTextNode(this.dataset.e))"></div><b>ML Diamonds</b><span>Mobile Legends</span>
     </button>
     <button class="service" onclick="openService('premium')">
-      <div class="icon">⭐</div><b>Premium</b><span>Telegram</span>
+      <div class="icon"><img src="premium.png" data-e="⭐" onerror="this.replaceWith(document.createTextNode(this.dataset.e))"></div><b>Premium</b><span>Telegram</span>
     </button>
     <button class="service" onclick="openService('stars')">
-      <div class="icon">🌟</div><b>Stars</b><span>Telegram</span>
+      <div class="icon"><img src="stars.png" data-e="🌟" onerror="this.replaceWith(document.createTextNode(this.dataset.e))"></div><b>Stars</b><span>Telegram</span>
     </button>
     <button class="service" onclick="openService('gifts')">
-      <div class="icon">🎁</div><b>Gifts</b><span>Telegram</span>
+      <div class="icon"><img src="gifts.png" data-e="🎁" onerror="this.replaceWith(document.createTextNode(this.dataset.e))"></div><b>Gifts</b><span>Telegram</span>
     </button>
   </div>
 </div>
