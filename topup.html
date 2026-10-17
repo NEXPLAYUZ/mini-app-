@@ -1,0 +1,170 @@
+<script>window.CARD="4073 4200 8268 7975";</script>
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Hisobni to'ldirish</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;padding:16px;font-family:-apple-system,Arial,sans-serif;background:#0f1117;color:#fff}
+  h1{font-size:20px;margin:0 0 14px}
+  .card{background:#1a1d27;border-radius:14px;padding:14px;margin-bottom:12px}
+  .muted{color:#8b90a0;font-size:13px}
+  .bal{font-size:24px;font-weight:700;margin-top:4px}
+  .method{border:2px solid #2f7cf6;border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px}
+  input[type=number]{width:100%;padding:14px;border-radius:12px;border:1px solid #2a2e3d;background:#0f1117;color:#fff;font-size:18px;outline:none}
+  .quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .quick button{flex:1;min-width:70px;padding:10px;border-radius:10px;border:1px solid #2a2e3d;background:#0f1117;color:#fff;font-size:14px}
+  .btn{width:100%;padding:15px;border:none;border-radius:12px;background:#2f7cf6;color:#fff;font-size:16px;font-weight:600;margin-top:6px}
+  .btn:disabled{opacity:.5}
+  .btn.gray{background:#2a2e3d}
+  .cardnum{font-size:22px;font-weight:700;letter-spacing:1px;margin:6px 0;user-select:all}
+  .err{color:#ff6b6b;font-size:14px;margin:8px 0;min-height:18px}
+  .hide{display:none}
+  .ok{text-align:center;padding:30px 10px}
+  .ok .big{font-size:56px}
+  label.file{display:block;padding:14px;border:2px dashed #2f7cf6;border-radius:12px;text-align:center;color:#8fb6ff;margin-top:10px}
+  #prev{max-width:100%;border-radius:10px;margin-top:10px}
+</style>
+</head>
+<body>
+<h1>💳 Hisobni to'ldirish</h1>
+
+<div class="card">
+  <div class="muted">Joriy balans</div>
+  <div class="bal"><span id="bal">0</span> so'm</div>
+</div>
+
+<!-- 1-ekran -->
+<div id="s1">
+  <div class="card">
+    <div class="muted" style="margin-bottom:8px">To'lov usuli</div>
+    <div class="method"><span style="font-size:26px">💳</span>
+      <div><b>Karta orqali</b><div class="muted">Humo / Uzcard / Visa (O'zbekiston)</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="muted" style="margin-bottom:8px">Summa (so'm)</div>
+    <input type="number" id="amount" inputmode="numeric" placeholder="Masalan: 50000">
+    <div class="quick">
+      <button data-v="10000">10 000</button>
+      <button data-v="25000">25 000</button>
+      <button data-v="50000">50 000</button>
+      <button data-v="100000">100 000</button>
+    </div>
+    <div class="muted" style="margin-top:8px">Minimal summa: 1 000 so'm</div>
+  </div>
+  <div class="err" id="err1"></div>
+  <button class="btn" id="next">Davom etish</button>
+</div>
+
+<!-- 2-ekran -->
+<div id="s2" class="hide">
+  <div class="card">
+    <div class="muted">Quyidagi kartaga to'lov qiling</div>
+    <div class="cardnum" id="cardnum"></div>
+    <div class="muted">Karta egasi: <b style="color:#fff">Firdavs Hamraqulov</b></div>
+    <div style="margin-top:10px">To'lov summasi: <b id="sum"></b> so'm</div>
+    <button class="btn gray" id="copy" style="margin-top:12px">📋 Karta raqamini nusxalash</button>
+  </div>
+  <div class="card">
+    <div class="muted">To'lov qilgach, chek rasmini yuboring</div>
+    <label class="file" for="photo" id="flabel">📷 Chek rasmini tanlash</label>
+    <input type="file" id="photo" accept="image/*" class="hide">
+    <img id="prev" class="hide">
+  </div>
+  <div class="err" id="err2"></div>
+  <button class="btn" id="send">Yuborish</button>
+  <button class="btn gray" id="back">Orqaga</button>
+</div>
+
+<!-- 3-ekran -->
+<div id="s3" class="hide">
+  <div class="card ok">
+    <div class="big">✅</div>
+    <h2>Chek yuborildi</h2>
+    <div class="muted">Admin tekshirgandan so'ng hisobingiz to'ldiriladi. Natija botga xabar sifatida keladi.</div>
+  </div>
+  <button class="btn" id="close">Yopish</button>
+</div>
+
+<script>
+const API = "https://nexplay-bot.rowzn43.workers.dev";
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
+const $ = id => document.getElementById(id);
+const fmt = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+let amount = 0;
+
+function show(id){ ["s1","s2","s3"].forEach(s => $(s).classList.toggle("hide", s !== id)); }
+
+async function loadBalance(){
+  try{
+    const r = await fetch(API + "/api/balance", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({initData: tg ? tg.initData : ""})
+    });
+    const d = await r.json();
+    if (d.ok) $("bal").textContent = fmt(d.balance);
+  }catch(e){}
+}
+loadBalance();
+
+document.querySelectorAll(".quick button").forEach(b => {
+  b.onclick = () => { $("amount").value = b.dataset.v; };
+});
+
+$("next").onclick = () => {
+  const v = parseInt($("amount").value, 10);
+  if (!v || v < 1000){ $("err1").textContent = "Minimal summa 1 000 so'm."; return; }
+  $("err1").textContent = "";
+  amount = v;
+  $("cardnum").textContent = window.CARD;
+  $("sum").textContent = fmt(v);
+  show("s2");
+};
+
+$("back").onclick = () => show("s1");
+
+$("copy").onclick = async () => {
+  const num = window.CARD.replace(/\s/g, "");
+  try{ await navigator.clipboard.writeText(num); $("copy").textContent = "✅ Nusxalandi"; }
+  catch(e){ $("copy").textContent = "Raqamni bosib turib nusxalang"; }
+};
+
+$("photo").onchange = () => {
+  const f = $("photo").files[0];
+  if (!f) return;
+  $("prev").src = URL.createObjectURL(f);
+  $("prev").classList.remove("hide");
+  $("flabel").textContent = "✅ Rasm tanlandi (almashtirish uchun bosing)";
+};
+
+$("send").onclick = async () => {
+  const f = $("photo").files[0];
+  if (!f){ $("err2").textContent = "Avval chek rasmini tanlang."; return; }
+  if (!tg || !tg.initData){ $("err2").textContent = "Mini Appni Telegram ichida oching."; return; }
+  $("err2").textContent = "";
+  $("send").disabled = true; $("send").textContent = "Yuborilmoqda...";
+  const fd = new FormData();
+  fd.append("initData", tg.initData);
+  fd.append("amount", String(amount));
+  fd.append("photo", f, "chek.jpg");
+  try{
+    const r = await fetch(API + "/api/topup", {method:"POST", body: fd});
+    const d = await r.json();
+    if (d.ok) show("s3");
+    else { $("err2").textContent = "Xatolik yuz berdi. Qayta urinib ko'ring."; }
+  }catch(e){
+    $("err2").textContent = "Internet bilan muammo. Qayta urinib ko'ring.";
+  }
+  $("send").disabled = false; $("send").textContent = "Yuborish";
+};
+
+$("close").onclick = () => { if (tg) tg.close(); };
+</script>
+</body>
+</html>
