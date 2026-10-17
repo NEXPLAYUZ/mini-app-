@@ -8,19 +8,12 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background: #0f1115;
-    color: #fff;
+    background: #0f1115; color: #fff;
     font-family: -apple-system, Arial, sans-serif;
-    padding: 16px;
-    padding-bottom: 40px;
+    padding: 16px; padding-bottom: 40px;
   }
   .hello { font-size: 20px; font-weight: 700; color: #34d399; margin: 8px 0 16px; }
-  .card {
-    background: #1a1c22;
-    border-radius: 20px;
-    padding: 18px;
-    margin-bottom: 14px;
-  }
+  .card { background: #1a1c22; border-radius: 20px; padding: 18px; margin-bottom: 14px; }
   .row { display: flex; justify-content: space-between; align-items: flex-end; }
   .small { color: #8b8f99; font-size: 14px; }
   .big { font-size: 32px; font-weight: 700; margin-top: 4px; }
@@ -38,48 +31,81 @@
   .service .icon { font-size: 36px; margin-bottom: 8px; }
   .service b { display: block; font-size: 16px; }
   .service span { color: #8b8f99; font-size: 13px; }
+  .hidden { display: none; }
+  .pack {
+    background: #1a1c22; color: #fff; border: 2px solid transparent;
+    border-radius: 16px; padding: 14px 10px; text-align: center;
+  }
+  .pack b { display: block; font-size: 17px; margin-bottom: 4px; }
+  .pack span { color: #8b8f99; font-size: 13px; }
+  .pack.on { border-color: #34d399; }
+  .input {
+    width: 100%; background: #1a1c22; color: #fff;
+    border: 2px solid #262932; border-radius: 14px;
+    padding: 14px; font-size: 16px; margin: 8px 0 16px; outline: none;
+  }
+  .btn {
+    width: 100%; background: #34d399; color: #062b1e; border: none;
+    border-radius: 16px; padding: 16px; font-size: 17px; font-weight: 700;
+  }
+  .note { color: #8b8f99; font-size: 12px; text-align: center; margin-top: 12px; }
 </style>
 </head>
 <body>
 
-<div class="hello" id="hello">Salom!</div>
+<div id="home">
+  <div class="hello" id="hello">Salom!</div>
 
-<div class="card">
-  <div class="row">
-    <div>
-      <div class="small">Joriy balans</div>
-      <div class="big">0 <span class="small">so'm</span></div>
+  <div class="card">
+    <div class="row">
+      <div>
+        <div class="small">Joriy balans</div>
+        <div class="big">0 <span class="small">so'm</span></div>
+      </div>
+      <div style="text-align:right">
+        <div class="small">Buyurtma</div>
+        <div style="font-size:20px;font-weight:700">0</div>
+      </div>
     </div>
-    <div style="text-align:right">
-      <div class="small">Buyurtma</div>
-      <div style="font-size:20px;font-weight:700">0</div>
-    </div>
+  </div>
+
+  <div class="menu">
+    <button onclick="msg('To‘ldirish bo‘limi tez orada ishga tushadi.')">To'ldirish</button>
+    <button onclick="msg('Tarix bo‘limi tez orada ishga tushadi.')">Tarix</button>
+    <button onclick="msg('Yordam bo‘limi tez orada ishga tushadi.')">Yordam</button>
+  </div>
+
+  <h2>Xizmatlar</h2>
+  <div class="grid">
+    <button class="service" onclick="openService('pubg')">
+      <div class="icon">🎯</div><b>PUBG UC</b><span>PUBG Mobile</span>
+    </button>
+    <button class="service" onclick="openService('ml')">
+      <div class="icon">💎</div><b>ML Diamonds</b><span>Mobile Legends</span>
+    </button>
+    <button class="service" onclick="openService('premium')">
+      <div class="icon">⭐</div><b>Premium</b><span>Telegram</span>
+    </button>
+    <button class="service" onclick="openService('stars')">
+      <div class="icon">🌟</div><b>Stars</b><span>Telegram</span>
+    </button>
+    <button class="service" onclick="openService('gifts')">
+      <div class="icon">🎁</div><b>Gifts</b><span>Telegram</span>
+    </button>
   </div>
 </div>
 
-<div class="menu">
-  <button onclick="soon('To‘ldirish')">To'ldirish</button>
-  <button onclick="soon('Tarix')">Tarix</button>
-  <button onclick="soon('Yordam')">Yordam</button>
-</div>
-
-<h2>Xizmatlar</h2>
-<div class="grid">
-  <button class="service" onclick="soon('PUBG UC')">
-    <div class="icon">🎯</div><b>PUBG UC</b><span>PUBG Mobile</span>
-  </button>
-  <button class="service" onclick="soon('ML Diamonds')">
-    <div class="icon">💎</div><b>ML Diamonds</b><span>Mobile Legends</span>
-  </button>
-  <button class="service" onclick="soon('Telegram Premium')">
-    <div class="icon">⭐</div><b>Premium</b><span>Telegram</span>
-  </button>
-  <button class="service" onclick="soon('Telegram Stars')">
-    <div class="icon">🌟</div><b>Stars</b><span>Telegram</span>
-  </button>
-  <button class="service" onclick="soon('Telegram Gifts')">
-    <div class="icon">🎁</div><b>Gifts</b><span>Telegram</span>
-  </button>
+<div id="service" class="hidden">
+  <div class="hello" id="sTitle"></div>
+  <div id="soon" class="small hidden">Bu bo‘lim tez orada ishga tushadi.</div>
+  <div id="form">
+    <h2>Paketni tanlang</h2>
+    <div class="grid" id="packs"></div>
+    <h2 style="margin-top:20px" id="idLabel"></h2>
+    <input class="input" id="uid" type="text" placeholder="Kiriting">
+    <button class="btn" onclick="order()">Buyurtma berish</button>
+    <div class="note">Narxlar namuna. To'lov tizimi hali ulanmagan.</div>
+  </div>
 </div>
 
 <script>
@@ -91,10 +117,80 @@
     if (user && user.first_name) {
       document.getElementById('hello').textContent = 'Salom, ' + user.first_name + '!';
     }
+    tg.BackButton.onClick(goHome);
   }
-  function soon(name) {
-    const text = name + ' bo‘limi tez orada ishga tushadi.';
+
+  const SERVICES = {
+    pubg: { name: "PUBG UC", idLabel: "PUBG Mobile ID",
+      packs: [["60 UC", 12000], ["325 UC", 60000], ["660 UC", 120000], ["1800 UC", 300000]] },
+    ml: { name: "ML Diamonds", idLabel: "Mobile Legends ID (Zone ID)",
+      packs: [["86 Diamonds", 20000], ["172 Diamonds", 40000], ["257 Diamonds", 60000], ["706 Diamonds", 160000]] },
+    premium: { name: "Telegram Premium", idLabel: "Telegram @username",
+      packs: [["3 oy", 170000], ["6 oy", 230000], ["12 oy", 400000]] },
+    stars: { name: "Telegram Stars", idLabel: "Telegram @username",
+      packs: [["50 Stars", 15000], ["100 Stars", 30000], ["500 Stars", 150000], ["1000 Stars", 300000]] },
+    gifts: { name: "Telegram Gifts", idLabel: "", packs: [] }
+  };
+
+  let picked = null;
+  let currentKey = null;
+
+  function msg(text) {
     if (tg && tg.showAlert) { tg.showAlert(text); } else { alert(text); }
+  }
+
+  function fmt(n) {
+    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " so'm";
+  }
+
+  function openService(key) {
+    currentKey = key;
+    picked = null;
+    const s = SERVICES[key];
+    document.getElementById('sTitle').textContent = s.name;
+    const box = document.getElementById('packs');
+    box.innerHTML = "";
+    document.getElementById('uid').value = "";
+
+    if (s.packs.length === 0) {
+      document.getElementById('form').classList.add('hidden');
+      document.getElementById('soon').classList.remove('hidden');
+    } else {
+      document.getElementById('form').classList.remove('hidden');
+      document.getElementById('soon').classList.add('hidden');
+      document.getElementById('idLabel').textContent = s.idLabel;
+      s.packs.forEach(function (p, i) {
+        const b = document.createElement('button');
+        b.className = 'pack';
+        b.innerHTML = '<b>' + p[0] + '</b><span>' + fmt(p[1]) + '</span>';
+        b.onclick = function () {
+          picked = i;
+          Array.from(box.children).forEach(function (c) { c.classList.remove('on'); });
+          b.classList.add('on');
+        };
+        box.appendChild(b);
+      });
+    }
+
+    document.getElementById('home').classList.add('hidden');
+    document.getElementById('service').classList.remove('hidden');
+    window.scrollTo(0, 0);
+    if (tg) { tg.BackButton.show(); }
+  }
+
+  function goHome() {
+    document.getElementById('service').classList.add('hidden');
+    document.getElementById('home').classList.remove('hidden');
+    window.scrollTo(0, 0);
+    if (tg) { tg.BackButton.hide(); }
+  }
+
+  function order() {
+    if (picked === null) { msg("Avval paketni tanlang."); return; }
+    if (document.getElementById('uid').value.trim() === "") {
+      msg("Iltimos, " + SERVICES[currentKey].idLabel + " ni kiriting."); return;
+    }
+    msg("Sinov rejimi: to'lov tizimi hali ulanmagan, buyurtma yuborilmadi.");
   }
 </script>
 
