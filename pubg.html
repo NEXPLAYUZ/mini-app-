@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PUBG UC</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b1226;color:#fff;font-family:-apple-system,Arial,sans-serif;padding:16px 16px 110px}
+.back{background:#1a2440;color:#fff;border:0;border-radius:14px;padding:10px 16px;font-size:15px;margin-bottom:14px}
+.card{background:#131b33;border:1px solid #243052;border-radius:22px;padding:16px;margin-bottom:16px}
+.head{display:flex;align-items:center;gap:14px}
+.logo{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;font-size:34px}
+.title{font-size:24px;font-weight:800}
+.label{color:#8b95b3;font-size:13px;letter-spacing:1px;margin:6px 4px 10px;text-transform:uppercase}
+input{width:100%;background:#1a2440;border:1px solid #2a3860;border-radius:16px;padding:14px;font-size:17px;color:#fff;outline:none}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pack{background:#1a2440;border:2px solid transparent;border-radius:18px;padding:14px 8px;text-align:center;color:#fff}
+.pack.sel{border-color:#6366f1;background:#1e2850}
+.pack .n{font-weight:800;font-size:18px}
+.pack .p{color:#818cf8;font-weight:700;margin-top:6px;font-size:14px}
+.price{display:flex;justify-content:space-between;align-items:center;background:#1a2440;border-radius:16px;padding:16px}
+.price b{color:#818cf8;font-size:22px}
+.note{color:#8b95b3;font-size:13px;margin-top:10px}
+.bar{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:#0b1226}
+.buy{width:100%;background:#2b3cf0;color:#fff;border:0;border-radius:999px;padding:18px;font-size:18px;font-weight:700}
+.buy:disabled{opacity:.5}
+</style>
+</head>
+<body>
+<button class="back" onclick="location.href='index.html'">‹ Orqaga</button>
+<div class="card head"><div class="logo">🎮</div><div class="title">PUBG UC</div></div>
+
+<div class="label">PUBG ID</div>
+<div class="card"><input id="pid" inputmode="numeric" placeholder="PUBG ID raqamini kiriting"></div>
+
+<div class="label">UC paketini tanlang</div>
+<div class="grid" id="grid"></div>
+
+<div class="label" style="margin-top:16px">Narx</div>
+<div class="card">
+  <div class="price"><span>Jami</span><b id="total">0 so'm</b></div>
+  <div class="note">Balansingiz: <span id="bal">...</span> so'm</div>
+</div>
+
+<div class="bar"><button class="buy" id="buy" disabled>Sotib olish</button></div>
+
+<script>
+var API = "https://nexplay-bot.rowzn43.workers.dev";
+var PACKS = [[60,13000],[120,26000],[180,39000],[240,52000],[325,60000],[385,73000],[445,86000],[505,99000],[660,120000],[720,133000],[780,146000],[985,180000],[1320,240000],[1800,305000],[2125,365000],[2460,425000],[3850,580000],[4510,700000],[5650,885000],[8100,1200000],[11950,1780000],[24300,3600000],[81000,12500000]];
+var tg = window.Telegram && window.Telegram.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
+var sel = null;
+
+function fmt(n) { return Number(n).toLocaleString("ru-RU"); }
+function msg(t) { if (tg && tg.showAlert) tg.showAlert(t); else alert(t); }
+function ask(t, cb) { if (tg && tg.showConfirm) tg.showConfirm(t, cb); else cb(confirm(t)); }
+
+var grid = document.getElementById("grid");
+PACKS.forEach(function (p) {
+  var b = document.createElement("button");
+  b.className = "pack";
+  b.innerHTML = '<div class="n">' + fmt(p[0]) + ' UC</div><div class="p">' + fmt(p[1]) + " so'm</div>";
+  b.onclick = function () {
+    sel = p;
+    Array.prototype.forEach.call(grid.children, function (c) { c.classList.remove("sel"); });
+    b.classList.add("sel");
+    document.getElementById("total").textContent = fmt(p[1]) + " so'm";
+    document.getElementById("buy").disabled = false;
+  };
+  grid.appendChild(b);
+});
+
+async function post(path, body) {
+  var r = await fetch(API + path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  return r.json();
+}
+
+async function loadBal() {
+  try {
+    if (!tg || !tg.initData) return;
+    var d = await post("/api/balance", { initData: tg.initData });
+    if (d.ok) document.getElementById("bal").textContent = fmt(d.balance);
+  } catch (e) {}
+}
+loadBal();
+
+document.getElementById("buy").onclick = function () {
+  var pid = document.getElementById("pid").value.trim();
+  if (!sel) return msg("UC paketini tanlang.");
+  if (!/^\d{5,15}$/.test(pid)) return msg("PUBG ID faqat raqamlardan iborat bo'lishi kerak.");
+  ask(fmt(sel[0]) + " UC, " + fmt(sel[1]) + " so'm. PUBG ID: " + pid + ". Tasdiqlaysizmi?", async function (ok) {
+    if (!ok) return;
+    try {
+      var d = await post("/api/order_uc", { initData: tg.initData, uc: sel[0], pid: pid });
+      if (d.ok) {
+        msg("✅ Buyurtma qabul qilindi. UC tez orada yuboriladi.");
+        if (d.balance !== undefined) document.getElementById("bal").textContent = fmt(d.balance);
+      } else if (d.error === "balance") {
+        msg("Balansingiz yetarli emas. Avval hisobni to'ldiring.");
+      } else {
+        msg("Xatolik. Keyinroq urinib ko'ring.");
+      }
+    } catch (e) {
+      msg("Xatolik. Keyinroq urinib ko'ring.");
+    }
+  });
+};
+</script>
+</body>
+</html>
