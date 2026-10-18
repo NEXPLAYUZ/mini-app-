@@ -202,6 +202,14 @@
 
 </body>
  <script>
+var _oldOpen = window.openService;
+window.openService = function (k) {
+  if (k === "gifts") { location.href = "gifts.html"; return; }
+  if (_oldOpen) return _oldOpen.apply(this, arguments);
+};
+</script>
+
+ <script>
 (async function () {
   try {
     var tg = window.Telegram && window.Telegram.WebApp;
