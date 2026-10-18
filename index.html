@@ -201,6 +201,18 @@
 </script>
 
 </body>
+
+ <script>
+document.addEventListener("click", function (e) {
+  var b = e.target.closest && e.target.closest(".service");
+  if (b && (b.getAttribute("onclick") || "").indexOf("gifts") > -1) {
+    e.preventDefault();
+    e.stopPropagation();
+    location.href = "gifts.html";
+  }
+}, true);
+</script>
+
  <script>
 var _oldOpen = window.openService;
 window.openService = function (k) {
