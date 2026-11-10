@@ -217,6 +217,22 @@
 </script>
 
 </body>
+ <script>
+document.addEventListener('click', function (e) {
+  var el = e.target;
+  for (var i = 0; i < 6 && el && el !== document.body; i++) {
+    var t = (el.textContent || '').trim();
+    if (t.length < 80 && /PUBG/i.test(t)) {
+      e.preventDefault();
+      e.stopPropagation();
+      location.href = 'pubg.html?v=9';
+      return;
+    }
+    el = el.parentElement;
+  }
+}, true);
+</script>
+
 
  <script>
 document.addEventListener("click", function (e) {
