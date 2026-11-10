@@ -104,6 +104,50 @@ $("buy").onclick = function() {
   const msg = PACKS[sel][0] + " UC, ID: " + id + "\nTo'lov tizimi hali ulanmagan (namuna).";
   if (tg && tg.showAlert) tg.showAlert(msg); else alert(msg);
 };
+  // --- Narxlar Worker bilan bir xil ---
+PACKS.length = 0;
+[[60,13000],[120,26000],[180,39000],[240,52000],[325,60000],[385,73000],
+ [445,86000],[505,99000],[660,120000],[720,133000],[780,146000],[985,180000],
+ [1320,240000],[1800,305000],[2125,365000],[2460,425000],[3850,580000],
+ [4510,700000],[5650,885000],[8100,1200000],[11950,1780000],[24300,3600000],
+ [81000,12500000]].forEach(function (p) { PACKS.push(p); });
+sel = 0;
+render();
+
+// --- Xarid qilish tugmasi Worker'ga ulanadi ---
+$("buy").onclick = async function () {
+  const btn = $("buy");
+  const id = $("pid").value.replace(/\D/g, "");
+  if (id.length < 5) { $("err").textContent = "Player ID noto'g'ri"; return; }
+  $("err").textContent = "";
+  if (!tg || !tg.initData) {
+    $("err").textContent = "Iltimos, Telegram ichida oching";
+    return;
+  }
+  const old = btn.innerHTML;
+  btn.disabled = true;
+  btn.textContent = "Yuborilmoqda...";
+  try {
+    const r = await fetch("https://nexplay-bot.rowzn43.workers.dev/api/order_uc", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ initData: tg.initData, uc: PACKS[sel][0], pid: id })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      tg.showAlert(PACKS[sel][0] + " UC buyurtmasi qabul qilindi!\nBalans: " + fmt(d.balance) + " so'm");
+    } else if (d.error === "balance") {
+      $("err").textContent = "Hisobingizda mablag' yetarli emas. Avval hisobni to'ldiring.";
+    } else {
+      $("err").textContent = "Xatolik: " + (d.error || "noma'lum");
+    }
+  } catch (e) {
+    $("err").textContent = "Tarmoq xatosi. Qayta urinib ko'ring.";
+  }
+  btn.disabled = false;
+  btn.innerHTML = old;
+};
+
 </script>
 </body>
 </html>
