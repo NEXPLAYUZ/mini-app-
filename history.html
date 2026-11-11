@@ -41,6 +41,15 @@ h2{margin:8px 0 16px}
       list.innerHTML = '<div class="empty">Hozircha tarix bo\'sh.</div>';
       return;
     }
+            if (location.search.indexOf("f=buy") > -1) {
+          document.querySelector("h2").textContent = "Buyurtmalar";
+          d.history = d.history.filter(function (x) { return x.s === "buy"; });
+          if (!d.history.length) {
+            list.innerHTML = '<div class="empty">Hozircha buyurtma yo\'q</div>';
+            return;
+          }
+        }
+
             list.innerHTML = d.history.map(function (x) {
           var sum = Number(x.a).toLocaleString("ru-RU") + " so'm";
           var date = new Date(x.t).toLocaleString("ru-RU");
