@@ -299,5 +299,21 @@ window.openService = function (k) {
   } catch (e) {}
 })();
 </script>
+<script>
+document.addEventListener("click", function (e) {
+  var el = e.target;
+  while (el && el !== document.body) {
+    var t = (el.textContent || "").trim();
+    if (t.length > 0 && t.length < 150 && /ML\s*Diamond/i.test(t) && !/PUBG|Premium|Stars|Gifts/i.test(t)) {
+      e.preventDefault();
+      e.stopPropagation();
+      location.href = "ml.html?v=22";
+      return;
+    }
+    el = el.parentElement;
+  }
+}, true);
+</script>
+
 
 </html>
