@@ -218,6 +218,34 @@
 
 </body>
  <script>
+(function () {
+  try {
+    var tg = window.Telegram && window.Telegram.WebApp;
+    var all = document.querySelectorAll("*");
+    var label = null;
+    for (var i = 0; i < all.length; i++) {
+      if (all[i].children.length === 0 && all[i].textContent.trim() === "Buyurtma") { label = all[i]; break; }
+    }
+    if (!label) return;
+    var box = label.parentElement;
+    var val = label.nextElementSibling;
+    box.style.cursor = "pointer";
+    box.addEventListener("click", function () { location.href = "history.html?f=buy&v=11"; });
+    if (!tg || !tg.initData) return;
+    fetch("https://nexplay-bot.rowzn43.workers.dev/api/history", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ initData: tg.initData })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (!d.ok || !d.history || !val) return;
+      var n = d.history.filter(function (x) { return x.s === "buy"; }).length;
+      val.textContent = n;
+    });
+  } catch (e) {}
+})();
+</script>
+
+ <script>
 document.addEventListener('click', function (e) {
   var el = e.target;
   for (var i = 0; i < 6 && el && el !== document.body; i++) {
