@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>ML Diamonds</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#120a0c;color:#fff;font-family:-apple-system,Helvetica,Arial,sans-serif;padding:14px 14px 130px}
+.head{display:flex;align-items:center;gap:12px;background:#1d1215;border:1px solid #3a1c22;border-radius:16px;padding:12px;margin-bottom:14px}
+.head img{width:52px;height:52px;border-radius:12px;object-fit:cover;background:#2a161b}
+.head b{font-size:17px;display:block}
+.head span{font-size:12px;color:#b8a3a7}
+.lbl{font-size:12px;color:#b8a3a7;margin:12px 0 6px;letter-spacing:.5px}
+input{width:100%;background:#1d1215;border:1px solid #3a1c22;border-radius:12px;color:#fff;font-size:16px;padding:13px}
+input:focus{outline:none;border-color:#e11d2e}
+.row{display:flex;gap:10px}
+.row>div{flex:1}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pk{position:relative;background:#1d1215;border:1px solid #3a1c22;border-radius:14px;padding:14px 10px;text-align:left;color:#fff;cursor:pointer;min-height:68px}
+.pk .n{font-size:16px;font-weight:700}
+.pk .p{font-size:13px;color:#ff5a68;margin-top:5px}
+.pk.hit{border-color:#a8742a;background:#241a14}
+.pk.hit .p{color:#ffb84d}
+.tag{position:absolute;top:6px;right:6px;background:#e0922b;color:#fff;font-size:10px;font-weight:700;border-radius:8px;padding:2px 6px}
+.pk.sel{border-color:#e11d2e;background:#3a141a;box-shadow:0 0 0 2px #e11d2e inset}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#170d10;border-top:1px solid #3a1c22;padding:12px 14px 22px;display:flex;align-items:center;gap:12px}
+.tot{flex:1}
+.tot span{font-size:11px;color:#b8a3a7;display:block}
+.tot b{font-size:18px}
+.buy{background:#e11d2e;color:#fff;border:0;border-radius:14px;font-size:16px;font-weight:700;padding:14px 22px}
+.buy:disabled{opacity:.5}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <img src="ml.png" alt="">
+  <div><b>Mobile Legends</b><span>Diamonds va to'plamlar</span></div>
+</div>
+
+<div class="row">
+  <div>
+    <div class="lbl">USER ID</div>
+    <input id="uid" type="tel" inputmode="numeric" placeholder="Masalan: 12345678">
+  </div>
+  <div>
+    <div class="lbl">SERVER ID</div>
+    <input id="zone" type="tel" inputmode="numeric" placeholder="Masalan: 1234">
+  </div>
+</div>
+
+<div class="lbl">MAHSULOTNI TANLANG</div>
+<div class="grid" id="grid"></div>
+
+<div class="bar">
+  <div class="tot"><span>JAMI</span><b id="tot">0 so'm</b></div>
+  <button class="buy" id="buy" onclick="buy()">Xarid qilish</button>
+</div>
+
+<script>
+var tg = window.Telegram && window.Telegram.WebApp;
+if (tg) { tg.ready(); tg.expand(); try { tg.BackButton.show(); tg.BackButton.onClick(function(){ history.back(); }); } catch(e){} }
+
+var API = "https://nexplay-bot.rowzn43.workers.dev";
+
+var P = [
+  {id:"h55",   n:"55",   p:9771,   hit:1, d:1},
+  {id:"h165",  n:"165",  p:29271,  hit:1, d:1},
+  {id:"h275",  n:"275",  p:46951,  hit:1, d:1},
+  {id:"h565",  n:"565",  p:94711,  hit:1, d:1},
+  {id:"wp",    n:"Haftalik propusk", p:19028},
+  {id:"tw",    n:"Twilight propusk", p:99012},
+  {id:"d86",   n:"86",   p:15400,  d:1},
+  {id:"d172",  n:"172",  p:30550,  d:1},
+  {id:"d257",  n:"257",  p:44254,  d:1},
+  {id:"d706",  n:"706",  p:118085, d:1},
+  {id:"d2195", n:"2195", p:354215, d:1},
+  {id:"d3688", n:"3688", p:590936, d:1},
+  {id:"d5532", n:"5532", p:892249, d:1},
+  {id:"d9288", n:"9288", p:1468482,d:1},
+  {id:"we",    n:"Haftalik elit to'plam", p:9771},
+  {id:"me",    n:"Oylik epik to'plam", p:49216}
+];
+
+var sel = null;
+
+function fmt(x){ return String(x).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+function msg(t){ if (tg && tg.showAlert) tg.showAlert(t); else alert(t); }
+
+function render(){
+  var h = "";
+  for (var i = 0; i < P.length; i++) {
+    var k = P[i];
+    h += '<div class="pk' + (k.hit ? ' hit' : '') + (sel === k.id ? ' sel' : '') + '" onclick="pick(\'' + k.id + '\')">';
+    if (k.hit) h += '<span class="tag">HIT</span>';
+    h += '<div class="n">' + k.n + (k.d ? ' 💎' : '') + '</div>';
+    h += '<div class="p">' + fmt(k.p) + " so'm</div></div>";
+  }
+  document.getElementById("grid").innerHTML = h;
+  var cur = null;
+  for (var j = 0; j < P.length; j++) { if (P[j].id === sel) cur = P[j]; }
+  document.getElementById("tot").textContent = (cur ? fmt(cur.p) : "0") + " so'm";
+}
+
+function pick(id){ sel = id; render(); }
+
+async function buy(){
+  var uid = document.getElementById("uid").value.trim();
+  var zone = document.getElementById("zone").value.trim();
+  if (!/^\d{5,14}$/.test(uid)) { msg("User ID ni to'g'ri kiriting."); return; }
+  if (!/^\d{3,7}$/.test(zone)) { msg("Server ID ni to'g'ri kiriting."); return; }
+  if (!sel) { msg("Avval mahsulotni tanlang."); return; }
+  var b = document.getElementById("buy");
+  b.disabled = true;
+  try {
+    var r = await fetch(API + "/api/order_ml", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({initData: tg ? tg.initData : "", pack: sel, uid: uid, zone: zone})
+    });
+    var d = await r.json();
+    if (d.ok) { msg("Buyurtma qabul qilindi. Tez orada yetkaziladi."); }
+    else { msg(d.error || "Xatolik yuz berdi."); }
+  } catch (e) {
+    msg("Internet xatosi. Qayta urinib ko'ring.");
+  }
+  b.disabled = false;
+}
+
+render();
+</script>
+</body>
+</html>
